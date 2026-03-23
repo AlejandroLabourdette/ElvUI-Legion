@@ -70,6 +70,16 @@ function UF:Configure_HealComm(frame)
 		healPrediction.absorbBar:SetStatusBarColor(c.absorbs.r, c.absorbs.g, c.absorbs.b, c.absorbs.a)
 		healPrediction.healAbsorbBar:SetStatusBarColor(c.healAbsorbs.r, c.healAbsorbs.g, c.healAbsorbs.b, c.healAbsorbs.a)
 
+		local hp = self.db.healPrediction
+		healPrediction.absorbBar:SetReverseFill(hp and (hp.absorbStyle == 'ABSORBS_FIXED_RIGHT' or hp.absorbOnTop))
+
+		local parent = frame.USE_PORTRAIT_OVERLAY and frame.Portrait.overlay or frame.Health
+		if hp and hp.absorbOnTop then
+			healPrediction.absorbBar:SetFrameLevel(parent:GetFrameLevel() + 10)
+		else
+			healPrediction.absorbBar:SetFrameLevel(parent:GetFrameLevel() + 1)
+		end
+
 		healPrediction.maxOverflow = (1 + (c.maxOverflow or 0))
 	else
 		if frame:IsElementEnabled('HealthPrediction') then
@@ -114,12 +124,87 @@ function UF:UpdateFillBar(frame, previousTexture, bar, amount, inverted)
 	return bar:GetStatusBarTexture();
 end
 
-function UF:UpdateHealComm(_, myIncomingHeal, allIncomingHeal, totalAbsorb, healAbsorb)
-	local frame = self.parent
-	local previousTexture = frame.Health:GetStatusBarTexture();
+function UF:UpdateAbsorbBar(frame, previousTexture, bar, amount)
+	if amount == 0 then bar:Hide(); return end
 
-	UF:UpdateFillBar(frame, previousTexture, self.healAbsorbBar, healAbsorb, true);
-	previousTexture = UF:UpdateFillBar(frame, previousTexture, self.myBar, myIncomingHeal);
-	previousTexture = UF:UpdateFillBar(frame, previousTexture, self.otherBar, allIncomingHeal);
-	UF:UpdateFillBar(frame, previousTexture, self.absorbBar, totalAbsorb);
+	local db           = UF.db.healPrediction
+	local absorbOnTop  = db and db.absorbOnTop
+	local absorbFixed  = absorbOnTop or (db and db.absorbStyle == 'ABSORBS_FIXED_RIGHT')
+	local customHeight = db and (db.absorbHeight  or 0)
+	local position     = db and (db.absorbPosition or 'BOTTOM')
+	local yOffset      = db and (db.absorbYOffset  or 0)
+	local orientation  = frame.Health:GetOrientation()
+	local totalWidth, totalHeight = frame.Health:GetSize()
+	if customHeight > 0 then
+		customHeight = math.floor(totalHeight * customHeight / 100)
+	end
+
+	bar:ClearAllPoints()
+
+	if orientation == 'HORIZONTAL' then
+		if customHeight > 0 then
+			if absorbFixed then
+				local anchor = position == 'TOP' and 'TOPRIGHT' or position == 'CENTER' and 'RIGHT' or 'BOTTOMRIGHT'
+				bar:Point(anchor, frame.Health, anchor, 0, yOffset)
+			else
+				local selfAnchor   = position == 'TOP' and 'TOPLEFT'   or position == 'CENTER' and 'LEFT'  or 'BOTTOMLEFT'
+				local parentAnchor = position == 'TOP' and 'TOPRIGHT'  or position == 'CENTER' and 'RIGHT' or 'BOTTOMRIGHT'
+				bar:Point(selfAnchor, previousTexture, parentAnchor, 0, yOffset)
+			end
+			bar:Width(totalWidth)
+			bar:Height(customHeight)
+		else
+			if absorbFixed then
+				bar:Point('TOPRIGHT',    frame.Health, 'TOPRIGHT',    0, yOffset)
+				bar:Point('BOTTOMRIGHT', frame.Health, 'BOTTOMRIGHT', 0, yOffset)
+			else
+				bar:Point('TOPLEFT',    previousTexture, 'TOPRIGHT',    0, yOffset)
+				bar:Point('BOTTOMLEFT', previousTexture, 'BOTTOMRIGHT', 0, yOffset)
+			end
+			bar:Width(totalWidth)
+		end
+	else -- VERTICAL
+		if customHeight > 0 then
+			if absorbFixed then
+				local anchor = position == 'TOP' and 'TOPRIGHT' or position == 'CENTER' and 'RIGHT' or 'BOTTOMRIGHT'
+				bar:Point(anchor, frame.Health, anchor, yOffset, 0)
+			else
+				local selfAnchor   = position == 'TOP' and 'TOPRIGHT'    or position == 'CENTER' and 'RIGHT' or 'BOTTOMRIGHT'
+				local parentAnchor = position == 'TOP' and 'TOPLEFT'     or position == 'CENTER' and 'LEFT'  or 'BOTTOMLEFT'
+				bar:Point(selfAnchor, previousTexture, parentAnchor, yOffset, 0)
+			end
+			bar:Height(totalHeight)
+			bar:Width(customHeight)
+		else
+			if absorbFixed then
+				bar:Point('TOPRIGHT', frame.Health, 'TOPRIGHT', yOffset, 0)
+				bar:Point('TOPLEFT',  frame.Health, 'TOPLEFT',  yOffset, 0)
+			else
+				bar:Point('TOPRIGHT',    previousTexture, 'TOPLEFT',    yOffset, 0)
+				bar:Point('BOTTOMRIGHT', previousTexture, 'BOTTOMLEFT', yOffset, 0)
+			end
+			bar:Height(totalHeight)
+		end
+	end
+
+	bar:Show()
+end
+
+function UF:UpdateHealComm(_, myIncomingHeal, allIncomingHeal, totalAbsorb, healAbsorb, hasOverAbsorb)
+	local frame = self.parent
+	local previousTexture = frame.Health:GetStatusBarTexture()
+
+	UF:UpdateFillBar(frame, previousTexture, self.healAbsorbBar, healAbsorb, true)
+	previousTexture = UF:UpdateFillBar(frame, previousTexture, self.myBar, myIncomingHeal)
+	previousTexture = UF:UpdateFillBar(frame, previousTexture, self.otherBar, allIncomingHeal)
+
+	local db = UF.db.healPrediction
+	if db and db.absorbOnTop and hasOverAbsorb then
+		local realAbsorb = UnitGetTotalAbsorbs(frame.unit) or 0
+		self.absorbBar:SetMinMaxValues(0, UnitHealthMax(frame.unit))
+		self.absorbBar:SetValue(realAbsorb)
+		UF:UpdateAbsorbBar(frame, previousTexture, self.absorbBar, realAbsorb)
+	else
+		UF:UpdateAbsorbBar(frame, previousTexture, self.absorbBar, totalAbsorb)
+	end
 end
