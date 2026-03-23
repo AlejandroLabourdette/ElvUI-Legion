@@ -951,7 +951,11 @@ P['unitframe'] = {
 		['daysColor'] = { r = 1, g = 1, b = 1 },
 	},
 	['healPrediction'] = {
-		['absorbStyle'] = 'ABSORBS_TRACK_HEALTH',
+		['absorbStyle']    = 'ABSORBS_TRACK_HEALTH',
+		['absorbOnTop']    = false,
+		['absorbHeight']   = 0,
+		['absorbPosition'] = 'BOTTOM',
+		['absorbYOffset']  = 0,
 	},
 	['colors'] = {
 		["borderColor"] = {r = 0, g = 0, b = 0},

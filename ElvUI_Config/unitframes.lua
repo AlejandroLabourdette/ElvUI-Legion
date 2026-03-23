@@ -2956,19 +2956,66 @@ E.Options.args.unitframe = {
 					type = 'group',
 					name = L["Heal Prediction"],
 					args = {
-						absorbStyle = {
+						absorbs = {
 							order = 1,
-							type = 'select',
-							name = L["Absorb Style"],
-							desc = L["Controls where the absorb bar is anchored on the health bar."],
-							get = function() return E.db.unitframe.healPrediction.absorbStyle end,
-							set = function(_, v)
-								E.db.unitframe.healPrediction.absorbStyle = v
-								UF:Update_AllFrames()
-							end,
-							values = {
-								ABSORBS_TRACK_HEALTH = L["Track Health"],
-								ABSORBS_FIXED_RIGHT  = L["Fixed (Right)"],
+							type = 'group',
+							inline = true,
+							name = L["Absorbs"],
+							args = {
+								absorbStyle = {
+									order = 1,
+									type = 'select',
+									name = L["Absorb Style"],
+									desc = L["Controls where the absorb bar is anchored on the health bar."],
+									get = function() return E.db.unitframe.healPrediction.absorbStyle end,
+									set = function(_, v)
+										E.db.unitframe.healPrediction.absorbStyle = v
+										UF:Update_AllFrames()
+									end,
+									values = {
+										ABSORBS_TRACK_HEALTH = L["Track Health"],
+										ABSORBS_FIXED_RIGHT  = L["Fixed (Right)"],
+									},
+								},
+								absorbOnTop = {
+									order = 2,
+									type = 'toggle',
+									name = L["Absorb On Top"],
+									desc = L["Draw the absorb bar on top of the health bar, visible even when health is full."],
+									get = function() return E.db.unitframe.healPrediction.absorbOnTop end,
+									set = function(_, v) E.db.unitframe.healPrediction.absorbOnTop = v; UF:Update_AllFrames() end,
+								},
+								absorbHeight = {
+									order = 3,
+									type = 'range',
+									name = L["Absorb Height"],
+									desc = L["Height of the absorb bar as a percentage of the frame height. Set to 0 to match the health bar height."],
+									min = 0, max = 100, step = 1,
+									get = function() return E.db.unitframe.healPrediction.absorbHeight end,
+									set = function(_, v) E.db.unitframe.healPrediction.absorbHeight = v; UF:Update_AllFrames() end,
+								},
+								absorbPosition = {
+									order = 4,
+									type = 'select',
+									name = L["Absorb Position"],
+									desc = L["Vertical alignment of the absorb bar within the health bar."],
+									disabled = function() return E.db.unitframe.healPrediction.absorbHeight == 0 end,
+									get = function() return E.db.unitframe.healPrediction.absorbPosition end,
+									set = function(_, v) E.db.unitframe.healPrediction.absorbPosition = v; UF:Update_AllFrames() end,
+									values = {
+										TOP    = L["Top"],
+										CENTER = L["Center"],
+										BOTTOM = L["Bottom"],
+									},
+								},
+								absorbYOffset = {
+									order = 5,
+									type = 'range',
+									name = L["Absorb Y-Offset"],
+									min = -20, max = 20, step = 1,
+									get = function() return E.db.unitframe.healPrediction.absorbYOffset end,
+									set = function(_, v) E.db.unitframe.healPrediction.absorbYOffset = v; UF:Update_AllFrames() end,
+								},
 							},
 						},
 					},
