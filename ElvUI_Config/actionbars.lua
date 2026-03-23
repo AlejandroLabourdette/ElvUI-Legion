@@ -596,14 +596,21 @@ local function BuildABConfig()
 				desc = L["The size of the action buttons."],
 				min = 15, max = 60, step = 1,
 			},
-			spacer2 = {
+			buttonspacing = {
 				order = 7,
+				type = 'range',
+				name = L["Button Spacing"],
+				desc = L["The spacing between buttons."],
+				min = -10, max = 20, step = 1,
+			},
+			spacer2 = {
+				order = 8,
 				type = "description",
 				name = " ",
 			},
 			visibility = {
 				type = 'input',
-				order = 8,
+				order = 9,
 				name = L["Visibility State"],
 				desc = L["This works like a macro, you can run different situations to get the actionbar to show/hide differently.\n Example: '[combat] show;hide'"],
 				width = 'full',
