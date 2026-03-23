@@ -101,6 +101,7 @@ end
 function AB:UpdateMicroPositionDimensions()
 	if not ElvUI_MicroBar then return end
 
+	local buttonsize = self.db.microbar.buttonsize
 	local numRows = 1
 	local prevButton = ElvUI_MicroBar
 	for i=1, (#MICRO_BUTTONS) do
@@ -108,9 +109,14 @@ function AB:UpdateMicroPositionDimensions()
 		local lastColumnButton = i-self.db.microbar.buttonsPerRow;
 		lastColumnButton = _G[__buttons[lastColumnButton]] or _G[MICRO_BUTTONS[lastColumnButton]]
 
-		button:Width(28)
-		button:Height(58)
+		button:Width(buttonsize)
+		button:Height(buttonsize * 2 + 2)
 		button:ClearAllPoints();
+		if button.backdrop then
+			button.backdrop:ClearAllPoints()
+			button.backdrop:Point("BOTTOMLEFT", button, "BOTTOMLEFT", 2, 0)
+			button.backdrop:Point("TOPRIGHT", button, "TOPRIGHT", -2, -buttonsize)
+		end
 
 		if prevButton == ElvUI_MicroBar then
 			button:Point("TOPLEFT", prevButton, "TOPLEFT", -2, 28)
