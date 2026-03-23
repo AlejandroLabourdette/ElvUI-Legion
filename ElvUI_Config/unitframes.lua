@@ -2951,6 +2951,28 @@ E.Options.args.unitframe = {
 						},
 					},
 				},
+				healPredictionGroup = {
+					order = 7,
+					type = 'group',
+					name = L["Heal Prediction"],
+					args = {
+						absorbStyle = {
+							order = 1,
+							type = 'select',
+							name = L["Absorb Style"],
+							desc = L["Controls where the absorb bar is anchored on the health bar."],
+							get = function() return E.db.unitframe.healPrediction.absorbStyle end,
+							set = function(_, v)
+								E.db.unitframe.healPrediction.absorbStyle = v
+								UF:Update_AllFrames()
+							end,
+							values = {
+								ABSORBS_TRACK_HEALTH = L["Track Health"],
+								ABSORBS_FIXED_RIGHT  = L["Fixed (Right)"],
+							},
+						},
+					},
+				},
 				disabledBlizzardFrames = {
 					order = 5,
 					type = "group",

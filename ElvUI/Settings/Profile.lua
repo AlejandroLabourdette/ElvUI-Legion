@@ -950,6 +950,9 @@ P['unitframe'] = {
 		['hoursColor'] = { r = 1, g = 1, b = 1 },
 		['daysColor'] = { r = 1, g = 1, b = 1 },
 	},
+	['healPrediction'] = {
+		['absorbStyle'] = 'ABSORBS_TRACK_HEALTH',
+	},
 	['colors'] = {
 		["borderColor"] = {r = 0, g = 0, b = 0},
 		['healthclass'] = false,

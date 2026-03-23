@@ -70,6 +70,9 @@ function UF:Configure_HealComm(frame)
 		healPrediction.absorbBar:SetStatusBarColor(c.absorbs.r, c.absorbs.g, c.absorbs.b, c.absorbs.a)
 		healPrediction.healAbsorbBar:SetStatusBarColor(c.healAbsorbs.r, c.healAbsorbs.g, c.healAbsorbs.b, c.healAbsorbs.a)
 
+		local hp = self.db.healPrediction
+		healPrediction.absorbBar:SetReverseFill(hp and hp.absorbStyle == 'ABSORBS_FIXED_RIGHT')
+
 		healPrediction.maxOverflow = (1 + (c.maxOverflow or 0))
 	else
 		if frame:IsElementEnabled('HealthPrediction') then
@@ -117,9 +120,16 @@ end
 function UF:UpdateHealComm(_, myIncomingHeal, allIncomingHeal, totalAbsorb, healAbsorb)
 	local frame = self.parent
 	local previousTexture = frame.Health:GetStatusBarTexture();
+	local hp = UF.db.healPrediction
+	local absorbFixed = hp and hp.absorbStyle == 'ABSORBS_FIXED_RIGHT'
 
 	UF:UpdateFillBar(frame, previousTexture, self.healAbsorbBar, healAbsorb, true);
 	previousTexture = UF:UpdateFillBar(frame, previousTexture, self.myBar, myIncomingHeal);
 	previousTexture = UF:UpdateFillBar(frame, previousTexture, self.otherBar, allIncomingHeal);
-	UF:UpdateFillBar(frame, previousTexture, self.absorbBar, totalAbsorb);
+
+	if absorbFixed then
+		UF:UpdateFillBar(frame, frame.Health, self.absorbBar, totalAbsorb, true);
+	else
+		UF:UpdateFillBar(frame, previousTexture, self.absorbBar, totalAbsorb);
+	end
 end
